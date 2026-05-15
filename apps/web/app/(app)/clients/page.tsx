@@ -1,8 +1,21 @@
-export default function ClientsPage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Clients</h1>
-      <p className="text-gray-500">Implemented in Issue #2</p>
-    </div>
-  )
+import { createClient } from "@/lib/supabase/server"
+import type { Client } from "@vertgrow/database/types"
+import { ClientList } from "./client-list"
+
+export default async function ClientsPage() {
+  const supabase = await createClient()
+  const { data: clients, error } = await supabase
+    .from("clients")
+    .select("*")
+    .order("created_at", { ascending: false })
+
+  if (error) {
+    return (
+      <div className="p-6 text-vg-error text-sm">
+        Failed to load clients: {error.message}
+      </div>
+    )
+  }
+
+  return <ClientList clients={(clients as Client[]) ?? []} />
 }
