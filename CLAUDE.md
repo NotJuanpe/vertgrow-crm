@@ -27,24 +27,52 @@ with what's already in the stack, do it that way.
 
 ---
 
-## Project Structure
+## Monorepo Structure
+
+This is a pnpm + Turborepo monorepo.
 
 ```
-/app                    # Next.js App Router pages
-  /dashboard            # Main CRM view
-  /clients              # Client management
-  /appointments         # Scheduling
-  /projects             # Active gardening projects
-  /plant-advisor        # AI plant recommendation tool
-  /api                  # API routes (server-side only)
-    /ai                 # Claude API calls go here, never client-side
-/components             # Reusable UI components
-/lib
-  /supabase             # Supabase client + types
-  /claude               # Claude API wrapper
-  /utils                # Shared helpers
-/supabase
-  /migrations           # SQL migrations — never edit the DB directly
+vertgrow-crm/
+├── apps/
+│   └── web/                        # Next.js 14 app (@vertgrow/web)
+│       ├── app/
+│       │   ├── (auth)/login/       # Login page (public)
+│       │   ├── (app)/              # Authenticated pages + shared layout
+│       │   │   ├── dashboard/
+│       │   │   ├── clients/
+│       │   │   ├── appointments/
+│       │   │   ├── projects/
+│       │   │   └── plant-advisor/
+│       │   └── api/ai/plant-advisor/  # Claude API route
+│       ├── components/
+│       │   ├── ui/                 # Base UI components (buttons, inputs, badges)
+│       │   └── layout/             # Sidebar, header, nav
+│       └── lib/
+│           ├── supabase/           # client.ts (browser) + server.ts (RSC)
+│           └── claude/             # Claude API wrapper + MODELS constants
+├── packages/
+│   └── database/                   # (@vertgrow/database)
+│       ├── src/types.ts            # Shared TypeScript types for all DB tables
+│       └── migrations/             # SQL migration files — run in Supabase dashboard
+├── turbo.json
+├── pnpm-workspace.yaml
+└── CLAUDE.md
+```
+
+### Running the project
+```bash
+pnpm install          # install all dependencies
+pnpm dev              # start apps/web on localhost:3000
+pnpm build            # build all packages
+```
+
+### Adding a new package dependency
+```bash
+# Add to the web app
+pnpm --filter @vertgrow/web add <package>
+
+# Add a dev dependency to root
+pnpm add -D -w <package>
 ```
 
 ---

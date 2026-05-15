@@ -1,0 +1,12 @@
+{
+  "name": "@vertgrow/database",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    "./types": "./src/types.ts",
+    "./migrations": "./migrations"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
