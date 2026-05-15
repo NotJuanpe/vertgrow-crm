@@ -96,7 +96,7 @@ The centrepiece AI feature. Lives at `/plant-advisor`.
 
 **Implementation rules:**
 - Claude API calls happen in `/app/api/ai/plant-advisor/route.ts` — never in client components
-- Use `claude-sonnet-4-6` model
+- Use `claude-sonnet-4-6` — this feature requires vision + complex reasoning
 - Always include the image as a base64-encoded vision input
 - Store the result in the project's plant list if the user approves it
 
@@ -127,6 +127,22 @@ never alter an existing one.
 - Forms use controlled inputs with validation before submission
 - Error states must always be handled and shown to the user — no silent failures
 - Mobile-first responsive design — the owner uses this on his phone on job sites
+
+---
+
+## Model Selection for AI Features
+
+When building any feature that calls the Claude API, pick the model based on the task:
+
+| Task type | Model |
+|---|---|
+| Vision input (photos) | `claude-sonnet-4-6` |
+| Complex reasoning, recommendations | `claude-sonnet-4-6` |
+| Simple text generation (reminders, summaries, short copy) | `claude-haiku-4-5-20251001` |
+| Structured data extraction from text | `claude-haiku-4-5-20251001` |
+
+Default to Haiku unless the task genuinely needs vision or multi-step reasoning.
+Haiku is ~10x cheaper and fast enough for simple tasks.
 
 ---
 
