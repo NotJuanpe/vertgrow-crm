@@ -12,6 +12,7 @@ export type AppointmentRow = {
   type: AppointmentType
   status: AppointmentStatus
   notes: string | null
+  series_id: string | null
   clients: { id: string; name: string }
 }
 
@@ -146,9 +147,16 @@ export function AppointmentList({ appointments }: { appointments: AppointmentRow
                           {appt.clients.name}
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${TYPE_BADGE[appt.type]}`}>
-                            {TYPE_LABEL[appt.type]}
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${TYPE_BADGE[appt.type]}`}>
+                              {TYPE_LABEL[appt.type]}
+                            </span>
+                            {appt.series_id && (
+                              <span title="Recurring" className="text-vg-muted">
+                                <RepeatIcon />
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4">
                           <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${STATUS_BADGE[appt.status]}`}>
@@ -188,6 +196,7 @@ export function AppointmentList({ appointments }: { appointments: AppointmentRow
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${TYPE_BADGE[appt.type]}`}>
                         {TYPE_LABEL[appt.type]}
                       </span>
+                      {appt.series_id && <RepeatIcon />}
                       {appt.notes && (
                         <p className="text-xs text-vg-body line-clamp-1 min-w-0">{appt.notes}</p>
                       )}
@@ -244,6 +253,15 @@ function PlusIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M5 12h14" /><path d="M12 5v14" />
+    </svg>
+  )
+}
+
+function RepeatIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-vg-muted">
+      <path d="m17 2 4 4-4 4" /><path d="M3 11V9a4 4 0 0 1 4-4h14" />
+      <path d="m7 22-4-4 4-4" /><path d="M21 13v2a4 4 0 0 1-4 4H3" />
     </svg>
   )
 }

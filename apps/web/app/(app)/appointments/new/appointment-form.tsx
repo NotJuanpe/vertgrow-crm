@@ -3,7 +3,7 @@
 import { useState, useMemo, useTransition, useRef } from "react"
 import Link from "next/link"
 import { createAppointment } from "../actions"
-import type { AppointmentType, AppointmentStatus } from "@vertgrow/database/types"
+import type { AppointmentType, AppointmentStatus, RecurrenceType } from "@vertgrow/database/types"
 
 type ClientOption = { id: string; name: string }
 
@@ -42,6 +42,9 @@ export function AppointmentForm({ clients }: { clients: ClientOption[] }) {
   const [type,         setType]         = useState<AppointmentType>("quote")
   const [status,       setStatus]       = useState<AppointmentStatus>("scheduled")
   const [notes,        setNotes]        = useState("")
+  const [isRecurring,  setIsRecurring]  = useState(false)
+  const [recurrence,   setRecurrence]   = useState<RecurrenceType>("monthly")
+  const [secondDay,    setSecondDay]    = useState("")
   const [error,        setError]        = useState<string | null>(null)
   const [fieldErrors,  setFieldErrors]  = useState<Partial<Record<string, string>>>({})
   const [isPending, startTransition]    = useTransition()
@@ -67,6 +70,8 @@ export function AppointmentForm({ clients }: { clients: ClientOption[] }) {
     if (!time)       errs.time     = "Time is required"
     if (!type)       errs.type     = "Type is required"
     if (!status)     errs.status   = "Status is required"
+    if (isRecurring && recurrence === "twice-monthly" && !secondDay)
+      errs.secondDay = "Enter the second day of the month"
     setFieldErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -78,6 +83,12 @@ export function AppointmentForm({ clients }: { clients: ClientOption[] }) {
     startTransition(async () => {
       const result = await createAppointment({
         client_id: clientId, date, time, duration_min: duration, type, status, notes,
+        ...(isRecurring && {
+          recurrence,
+          second_day_of_month: recurrence === "twice-monthly" && secondDay
+            ? parseInt(secondDay, 10)
+            : undefined,
+        }),
       })
       if (result?.error) setError(result.error)
     })
@@ -208,6 +219,70 @@ export function AppointmentForm({ clients }: { clients: ClientOption[] }) {
             </div>
           </div>
 
+          {/* Recurrence */}
+          <div className="flex flex-col gap-3">
+            <label className="flex items-center gap-3 cursor-pointer w-fit">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={isRecurring}
+                  onChange={(e) => setIsRecurring(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-10 h-5 bg-vg-border rounded-full peer peer-checked:bg-vg-green-dark transition-colors" />
+                <div className="absolute left-0.5 top-0.5 size-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5" />
+              </div>
+              <span className="text-sm font-semibold text-vg-body">Repeats</span>
+            </label>
+
+            {isRecurring && (
+              <div className="flex flex-col gap-4 p-4 bg-vg-bg-accent border border-vg-border rounded-xl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelCls}>Frequency</label>
+                    <select
+                      value={recurrence}
+                      onChange={(e) => setRecurrence(e.target.value as RecurrenceType)}
+                      className={selectCls}
+                    >
+                      <option value="weekly">Weekly</option>
+                      <option value="biweekly">Bi-weekly (every 2 weeks)</option>
+                      <option value="monthly">Monthly (same date)</option>
+                      <option value="twice-monthly">Twice a month</option>
+                    </select>
+                  </div>
+
+                  {recurrence === "twice-monthly" && (
+                    <div>
+                      <label className={labelCls}>Second day of month <span className="text-vg-error">*</span></label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={31}
+                        value={secondDay}
+                        onChange={(e) => {
+                          setSecondDay(e.target.value)
+                          setFieldErrors((p) => { const n = { ...p }; delete n.secondDay; return n })
+                        }}
+                        placeholder="e.g. 15"
+                        className={`${inputCls} ${fieldErrors.secondDay ? "border-vg-error ring-1 ring-vg-error" : ""}`}
+                      />
+                      {fieldErrors.secondDay && (
+                        <p className="mt-1 text-xs text-vg-error">{fieldErrors.secondDay}</p>
+                      )}
+                      <p className="mt-1 text-xs text-vg-muted">First day comes from the date above</p>
+                    </div>
+                  )}
+                </div>
+
+                <p className="text-xs text-vg-muted">
+                  Appointments will be created for the next 3 months starting from the date above.
+                  Each instance can be edited or cancelled independently.
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Notes */}
           <div>
             <label className={labelCls}>Notes</label>
@@ -227,7 +302,7 @@ export function AppointmentForm({ clients }: { clients: ClientOption[] }) {
               disabled={isPending}
               className="flex items-center gap-2 bg-vg-green-dark text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-vg-green transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {isPending ? "Saving…" : "Create Appointment"}
+              {isPending ? "Saving…" : isRecurring ? "Create Recurring Appointments" : "Create Appointment"}
             </button>
             <Link
               href="/appointments"

@@ -1,6 +1,7 @@
 export type ClientStatus = "lead" | "active" | "inactive"
 export type AppointmentType = "quote" | "installation" | "maintenance" | "follow-up"
 export type AppointmentStatus = "scheduled" | "completed" | "cancelled"
+export type RecurrenceType = "weekly" | "biweekly" | "monthly" | "twice-monthly"
 export type ProjectStatus = "planning" | "in_progress" | "completed"
 export type ReminderType = "follow-up-call" | "seasonal-maintenance" | "quote-expiry" | "custom"
 export type MaintenanceLevel = "low" | "medium" | "high"
@@ -27,6 +28,21 @@ export interface Appointment {
   status: AppointmentStatus
   notes: string | null
   project_id: string | null
+  series_id: string | null
+  created_at: string
+}
+
+export interface RecurringSeries {
+  id: string
+  client_id: string
+  type: AppointmentType
+  duration_min: number
+  time: string
+  recurrence: RecurrenceType
+  day_of_month: number | null
+  second_day_of_month: number | null
+  notes: string | null
+  starts_on: string
   created_at: string
 }
 

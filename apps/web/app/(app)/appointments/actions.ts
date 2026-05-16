@@ -4,17 +4,65 @@ import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
 import type { AppointmentType, AppointmentStatus, ReminderType } from "@vertgrow/database/types"
+import { generateAppointmentDates } from "@/lib/appointment-dates"
+
+// ── Actions ────────────────────────────────────────────────────────────────────
 
 export async function createAppointment(data: {
   client_id: string
-  date: string         // "YYYY-MM-DD"
-  time: string         // "HH:MM"
+  date: string              // "YYYY-MM-DD"
+  time: string              // "HH:MM"
   duration_min: number
   type: AppointmentType
   status: AppointmentStatus
   notes: string
+  recurrence?: RecurrenceType
+  second_day_of_month?: number
 }): Promise<{ error: string } | void> {
   const supabase = await createClient()
+
+  if (data.recurrence) {
+    // Insert the series record first
+    const { data: series, error: seriesErr } = await supabase
+      .from("recurring_series")
+      .insert({
+        client_id:           data.client_id,
+        type:                data.type,
+        duration_min:        data.duration_min,
+        time:                data.time,
+        recurrence:          data.recurrence,
+        day_of_month:        new Date(data.date + "T00:00:00").getDate(),
+        second_day_of_month: data.second_day_of_month ?? null,
+        notes:               data.notes.trim() || null,
+        starts_on:           data.date,
+      })
+      .select("id")
+      .single()
+
+    if (seriesErr) return { error: seriesErr.message }
+
+    // Generate all instances for the next 3 months
+    const dates = generateAppointmentDates(
+      data.date, data.time, data.recurrence, data.second_day_of_month ?? null, 3
+    )
+    const rows = dates.map((date) => ({
+      client_id:    data.client_id,
+      date,
+      duration_min: data.duration_min,
+      type:         data.type,
+      status:       "scheduled" as const,
+      notes:        data.notes.trim() || null,
+      project_id:   null,
+      series_id:    series.id,
+    }))
+
+    const { error: insertErr } = await supabase.from("appointments").insert(rows)
+    if (insertErr) return { error: insertErr.message }
+
+    redirect("/appointments")
+  }
+
+  // Single appointment
   const { data: row, error } = await supabase
     .from("appointments")
     .insert({
@@ -25,6 +73,7 @@ export async function createAppointment(data: {
       status:       data.status,
       notes:        data.notes.trim() || null,
       project_id:   null,
+      series_id:    null,
     })
     .select("id")
     .single()

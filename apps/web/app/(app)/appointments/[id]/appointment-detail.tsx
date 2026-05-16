@@ -14,6 +14,7 @@ export type AppointmentFull = {
   status: AppointmentStatus
   notes: string | null
   project_id: string | null
+  series_id: string | null
 }
 
 type ClientProject = { id: string; title: string }
@@ -175,6 +176,14 @@ export function AppointmentDetail({
             <Row label="Date">{formatDate(appointment.date)}</Row>
             <Row label="Time">{formatTime(appointment.date)}</Row>
             <Row label="Duration">{durationLabel(appointment.duration_min)}</Row>
+            {appointment.series_id && (
+              <Row label="Recurring">
+                <span className="inline-flex items-center gap-1.5 text-sm text-vg-body">
+                  <RepeatSmIcon />
+                  Part of a recurring series · changes apply to this instance only
+                </span>
+              </Row>
+            )}
             {appointment.project_id && (
               <Row label="Project">
                 <Link
@@ -356,6 +365,15 @@ function ChevronDownSmIcon({ open }: { open: boolean }) {
 }
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
+
+function RepeatSmIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-vg-muted shrink-0">
+      <path d="m17 2 4 4-4 4" /><path d="M3 11V9a4 4 0 0 1 4-4h14" />
+      <path d="m7 22-4-4 4-4" /><path d="M21 13v2a4 4 0 0 1-4 4H3" />
+    </svg>
+  )
+}
 
 function ChevronLeftIcon() {
   return (

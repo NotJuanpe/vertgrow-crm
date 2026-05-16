@@ -12,7 +12,7 @@ export default async function AppointmentDetailPage({
 
   const { data: appt } = await supabase
     .from("appointments")
-    .select("id, client_id, date, duration_min, type, status, notes, project_id")
+    .select("id, client_id, date, duration_min, type, status, notes, project_id, series_id")
     .eq("id", params.id)
     .single()
 
