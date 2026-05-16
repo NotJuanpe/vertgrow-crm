@@ -1,8 +1,12 @@
-export default function PlantAdvisorPage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Plant Advisor</h1>
-      <p className="text-gray-500">Implemented in Issue #6</p>
-    </div>
-  )
+import { createClient } from "@/lib/supabase/server"
+import { PlantAdvisor } from "./plant-advisor"
+
+export default async function PlantAdvisorPage() {
+  const supabase = await createClient()
+  const { data: projects } = await supabase
+    .from("projects")
+    .select("id, title")
+    .order("created_at", { ascending: false })
+
+  return <PlantAdvisor projects={projects ?? []} />
 }
