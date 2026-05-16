@@ -6,6 +6,7 @@ export type ProjectStatus = "planning" | "in_progress" | "completed"
 export type ReminderType = "follow-up-call" | "seasonal-maintenance" | "quote-expiry" | "custom"
 export type MaintenanceLevel = "low" | "medium" | "high"
 export type CareDifficulty = "easy" | "moderate" | "demanding"
+export type PhaseStatus = "pending" | "in_progress" | "done"
 
 export interface Client {
   id: string
@@ -85,4 +86,15 @@ export interface ProjectPhoto {
   project_id: string
   storage_path: string
   uploaded_at: string
+}
+
+export interface ProjectPhase {
+  id: string
+  project_id: string
+  name: string
+  start_date: string
+  end_date: string
+  status: PhaseStatus
+  notes: string | null
+  created_at: string
 }

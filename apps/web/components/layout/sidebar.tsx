@@ -9,7 +9,7 @@ const navItems = [
   { label: "Clients",        href: "/clients",        icon: ClientsIcon },
   { label: "Appointments",   href: "/appointments",   icon: CalendarIcon },
   { label: "Projects",       href: "/projects",       icon: ProjectsIcon },
-  { label: "Schedule",       href: "/schedule",       icon: ScheduleIcon },
+  { label: "Cronograma",     href: "/schedule",       icon: ScheduleIcon },
   { label: "Plant Advisor",  href: "/plant-advisor",  icon: LeafIcon },
 ]
 
