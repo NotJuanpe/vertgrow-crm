@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
-import type { AppointmentType, AppointmentStatus, ReminderType } from "@vertgrow/database/types"
+import type { AppointmentType, AppointmentStatus, ReminderType, RecurrenceType } from "@vertgrow/database/types"
 import { generateAppointmentDates } from "@/lib/appointment-dates"
 
 // ── Actions ────────────────────────────────────────────────────────────────────
