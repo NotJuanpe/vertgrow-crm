@@ -10,7 +10,7 @@ const navItems = [
   { label: "Appointments",   href: "/appointments",   icon: CalendarIcon },
   { label: "Projects",       href: "/projects",       icon: ProjectsIcon },
   { label: "Cronograma",     href: "/schedule",       icon: ScheduleIcon },
-  { label: "Plant Advisor",  href: "/plant-advisor",  icon: LeafIcon },
+  { label: "Plant Catalogue", href: "/plant-advisor",  icon: LeafIcon },
 ]
 
 export function Sidebar() {
